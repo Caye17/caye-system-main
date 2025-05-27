@@ -1,0 +1,65 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}{{ author.first_name }} {{ author.last_name }} — Home Library{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="background: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px;">
+  <div class="header-row mb-4 d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+      <a href="{% url 'authors' %}" class="btn btn-secondary rounded-pill me-3">← Back</a>
+      <h2 class="fw-bold mb-0">{{ author.first_name }} {{ author.last_name }}</h2>
+    </div>
+    {% if user.is_authenticated %}
+      <div>
+        <a href="{% url 'author-update' author.pk %}" class="btn btn-primary rounded-pill me-2">Edit</a>
+        <a href="{% url 'author-delete' author.pk %}" class="btn btn-danger rounded-pill">Delete</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="author-info mb-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Author Information</h5>
+        <div class="info-row">
+          <span class="label">Birth Date:</span>
+          <span class="value">{{ author.date_of_birth|date:"F j, Y"|default:"Unknown" }}</span>
+        </div>
+        {% if author.date_of_death %}
+        <div class="info-row">
+          <span class="label">Death Date:</span>
+          <span class="value">{{ author.date_of_death|date:"F j, Y" }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="books-section">
+    <h3 class="mb-3">Books by {{ author.first_name }} {{ author.last_name }}</h3>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      {% for book in author.book_set.all %}
+        <div class="col">
+          <div class="card h-100">
+            {% if book.cover_image %}
+              <img src="{{ book.cover_image.url }}" alt="Cover of {{ book.title }}" class="card-img-top book-cover">
+            {% else %}
+              <div class="card-img-top placeholder">No Cover</div>
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ book.title }}</h5>
+              <p class="genre text-muted">{{ book.genre|default:"No genre specified" }}</p>
+              <p class="availability {% if book.is_available %}text-success{% else %}text-danger{% endif %}">
+                {% if book.is_available %}Available{% else %}Not Available{% endif %}
+              </p>
+              <a href="{% url 'book-detail' book.pk %}" class="btn btn-primary rounded-pill">View Details</a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-center w-100">No books found for this author.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

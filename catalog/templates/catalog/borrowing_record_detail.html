@@ -1,0 +1,46 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}Borrowing Record Details — Home Library{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Borrowing Record Details</h2>
+    <a href="{% url 'borrowing-records' %}" class="btn btn-secondary mb-3 rounded-pill">← Back to All Records</a>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ borrowing_record.book.title }} borrowed by {{ borrowing_record.borrower.name }}</h5>
+            <p class="card-text">
+                <strong>Borrowing Date:</strong> {{ borrowing_record.borrow_date|date:"M d, Y" }}<br>
+                <strong>Due Date:</strong> {{ borrowing_record.due_date|date:"M d, Y" }}<br>
+                {% if borrowing_record.return_date %}
+                <strong>Return Date:</strong> {{ borrowing_record.return_date|date:"M d, Y" }}<br>
+                {% endif %}
+                <strong>Status:</strong>
+                {% if borrowing_record.status == 'pending' %}
+                    <span class="badge badge-warning">Pending</span>
+                {% elif borrowing_record.status == 'approved' %}
+                    {% if borrowing_record.returned %}
+                        <span class="badge badge-success">Returned</span>
+                    {% else %}
+                        <span class="badge badge-primary">Active</span>
+                    {% endif %}
+                {% elif borrowing_record.status == 'rejected' %}
+                    <span class="badge badge-danger">Rejected</span>
+                {% endif %}
+                {% if borrowing_record.is_overdue %}
+                    <span class="badge badge-danger">Overdue</span>
+                {% endif %}
+                <br>
+                {% if borrowing_record.notes %}
+                <strong>Notes:</strong> {{ borrowing_record.notes }}<br>
+                {% endif %}
+                {% if borrowing_record.processed_by %}
+                <strong>Processed By:</strong> {{ borrowing_record.processed_by.username }} at {{ borrowing_record.processed_at|date:"M d, Y H:i" }}<br>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+</div>
+{% endblock %} 

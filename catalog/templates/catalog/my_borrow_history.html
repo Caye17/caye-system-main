@@ -1,0 +1,58 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}My Borrowing History — Home Library{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>My Borrowing History</h2>
+    <a href="{% url 'home' %}" class="btn btn-secondary mb-3 rounded-pill">← Back</a>
+    
+    <div class="table-responsive mt-4">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Borrowing Date</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in borrowed_books %}
+                <tr>
+                    <td>{{ record.book.title }}</td>
+                    <td>{{ record.loan_date|date:"M d, Y" }}</td>
+                    <td>{{ record.due_date|date:"M d, Y" }}</td>
+                    <td>
+                        {% if record.status == 'approved' %}
+                            {% if record.returned %}
+                                <span class="badge badge-success">Returned</span>
+                            {% else %}
+                                <span class="badge badge-primary">Active</span>
+                            {% endif %}
+                        {% elif record.status == 'pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% elif record.status == 'rejected' %}
+                            <span class="badge badge-danger">Rejected</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if record.status == 'approved' and not record.returned %}
+                        <form method="post" action="{% url 'borrowing-record-return' record.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success">Return Book</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No borrowing history found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 

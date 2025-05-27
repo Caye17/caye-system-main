@@ -1,0 +1,138 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}Manage Borrowings — Home Library{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manage Borrowings</h2>
+    <a href="{% url 'home' %}" class="btn btn-secondary mb-3 rounded-pill">← Back</a>
+
+    <div class="table-responsive mt-4">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Borrower</th>
+                    <th>Request Date</th>
+                    <th>Borrowing Date</th>
+                    <th>Due Date</th>
+                    <th>Active Borrowings</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    {# Display Book and Borrower #}
+                    <td>{{ item.book.title }}</td>
+                    <td>
+                        {% if item.type == 'request' %}
+                            {% if item.user.borrower %}
+                                <a href="{% url 'borrower-html-detail' item.user.borrower.pk %}">{{ item.user.borrower.name }}</a>
+                            {% else %}
+                                {{ item.user.username }} (No Borrower Profile)
+                            {% endif %}
+                        {% else %}
+                            {% if item.borrower %}
+                                <a href="{% url 'borrower-html-detail' item.borrower.pk %}">{{ item.borrower.name }}</a>
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        {% endif %}
+                    </td>
+
+                    {# Display Request Date (only for requests) #}
+                    <td>{% if item.type == 'request' %}{{ item.request_date|date:"M d, Y" }}{% else %}—{% endif %}</td>
+
+                    {# Display Borrowing Date (only for records) #}
+                    <td>{% if item.type == 'record' %}{{ item.borrow_date|date:"M d, Y" }}{% else %}—{% endif %}</td>
+
+                    {# Display Due Date (only for records) #}
+                    <td>{% if item.type == 'record' and item.due_date %}{{ item.due_date|date:"M d, Y" }}{% else %}—{% endif %}</td>
+
+                    {# Display Active Borrowings Count #}
+                    <td>
+                        {% if item.active_borrowings_count is not None %}
+                            {{ item.active_borrowings_count }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </td>
+
+                    {# Display Status #}
+                    <td>
+                        {% if item.type == 'request' %}
+                            <span class="badge bg-warning">Pending Request</span>
+                        {% else %}
+                            {% if item.status == 'approved' %}
+                                {% if item.returned %}
+                                    <span class="badge bg-success">Returned</span>
+                                {% else %}
+                                     {% if item.due_date and item.due_date < today %}
+                                        <span class="badge bg-danger">Overdue</span>
+                                     {% else %}
+                                        <span class="badge bg-primary">Active</span>
+                                     {% endif %}
+                                {% endif %}
+                            {% elif item.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% elif item.status == 'returned' %}
+                                 <span class="badge bg-success">Returned</span>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+
+                    {# Display Actions #}
+                    <td>
+                        {% if item.type == 'request' %}
+                            <form method="post" action="{% url 'borrowing-record-approve' item.pk 'approve' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success me-1">Approve</button>
+                            </form>
+                            <form method="post" action="{% url 'borrowing-record-approve' item.pk 'reject' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                            </form>
+                        {% else %}
+                             {# For records, we remove the Return and Details actions #}
+                             —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center">No borrowing activities found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# Manual Pagination #}
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo; Previous</a>
+            </li>
+            {% endif %}
+
+            {% for i in paginator.page_range %}
+            <li class="page-item {% if page_obj.number == i %}active{% endif %}">
+                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next &raquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+{% endblock %} 

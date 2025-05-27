@@ -1,0 +1,47 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}Pending Borrow Requests{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4">
+        <a href="{% url 'home' %}" class="btn btn-secondary rounded-pill">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+    <h2 class="mb-4">Pending Borrow Requests</h2>
+    {% if pending_requests %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>User</th>
+                        <th>Book</th>
+                        <th>Request Date</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in pending_requests %}
+                        <tr>
+                            <td>{{ req.user.username }}</td>
+                            <td>{{ req.book.title }}</td>
+                            <td>{{ req.request_date|date:"M d, Y H:i" }}</td>
+                            <td class="text-end">
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="request_id" value="{{ req.id }}">
+                                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm rounded-pill me-2">Approve</button>
+                                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm rounded-pill">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-center">No pending borrow requests.</p>
+    {% endif %}
+</div>
+{% endblock %} 

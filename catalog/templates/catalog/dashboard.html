@@ -1,0 +1,455 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    /* Modern Dashboard Styles */
+    .dashboard-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    .hero {
+        background: url('https://images.unsplash.com/photo-1524985069026-dd778a71c7b4') center/cover;
+        color: white;
+        padding: 120px 20px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .hero h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        animation: slideDown 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .hero p {
+        font-size: 1.4rem;
+        opacity: 0.95;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        animation: slideUp 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stats-section {
+        margin-top: -70px;
+        position: relative;
+        z-index: 2;
+        padding: 0 20px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        height: 100%;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4f46e5, #6366f1);
+        transform: scaleX(0);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .card-icon {
+        width: 70px;
+        height: 70px;
+        background: #f0f4ff;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-card:hover .card-icon {
+        background: #4f46e5;
+        color: white;
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .card-icon i {
+        font-size: 28px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin: 15px 0;
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: fadeIn 1s ease-out;
+    }
+
+    .quantity-badge {
+        font-size: 0.9em;
+        padding: 0.5em 1em;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .quantity-badge:hover {
+        transform: scale(1.08);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .quantity-low {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .quantity-out {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .quantity-available {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+
+    .action-button {
+        padding: 0.8rem 1.6rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .action-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);
+    }
+
+    .action-button:hover::before {
+        opacity: 1;
+    }
+
+    .action-button span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .table-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-top: 40px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .table-card:hover {
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-card .card-header {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1.2rem 1.8rem;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table th {
+        font-weight: 600;
+        color: #4b5563;
+        padding: 1rem 1.5rem;
+    }
+
+    .table td {
+        vertical-align: middle;
+        padding: 1rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8fafc;
+        transform: scale(1.01);
+    }
+
+    .badge {
+        padding: 0.6em 1em;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .badge:hover {
+        transform: scale(1.05);
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translateY(-40px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(40px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { 
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to { 
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    /* Loading animation for cards */
+    .stat-card {
+        animation: cardAppear 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Welcome to the Library Dashboard</h1>
+            <p class="lead">Manage your collection, members, and transactions with ease.</p>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="container stats-section">
+        {% if user.is_staff %}
+            <div class="mb-4 text-end">
+                <a href="{% url 'borrowing-records' %}" class="action-button">
+                    <span><i class="bi bi-journal"></i> Manage Borrowings</span>
+                </a>
+            </div>
+        {% endif %}
+        
+        <div class="row g-4">
+            <!-- Total Books Card -->
+            <div class="col-md-{% if user.is_staff %}6{% else %}12{% endif %}">
+                <div class="stat-card">
+                    <div class="card-icon">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <h5 class="card-title text-center">Total Books</h5>
+                    <p class="stat-number text-center">{{ total_books }}</p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <span class="quantity-badge quantity-available">
+                            Available: {{ available_count }}
+                        </span>
+                        <span class="quantity-badge quantity-low">
+                            Low Stock: {{ low_stock_count }}
+                        </span>
+                        <span class="quantity-badge quantity-out">
+                            Out of Stock: {{ out_of_stock_count }}
+                        </span>
+                    </div>
+                    <div class="text-center mt-4">
+                        <a href="{% url 'books' %}" class="action-button">
+                            <span>View Books</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% if user.is_staff %}
+                <!-- Total Authors Card -->
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <div class="card-icon">
+                            <i class="bi bi-pencil"></i>
+                        </div>
+                        <h5 class="card-title text-center">Total Authors</h5>
+                        <p class="stat-number text-center">{{ total_authors }}</p>
+                        <div class="text-center mt-4">
+                            <a href="{% url 'authors' %}" class="action-button">
+                                <span>View Authors</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Active Borrowings Section -->
+        {% if borrowed_books %}
+        <div class="table-card">
+            <div class="card-header">
+                <h3 class="h5 mb-0">My Borrowing History</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Borrowing Date</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in borrowed_books %}
+                            <tr>
+                                <td>{{ record.book.title }}</td>
+                                <td>{{ record.borrow_date|date:"M d, Y" }}</td>
+                                <td>{{ record.due_date|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if record.status == 'pending' %}
+                                    <span class="badge bg-warning">Pending</span>
+                                    {% elif record.status == 'approved' %}
+                                        {% if record.is_overdue %}
+                                        <span class="badge bg-danger">Overdue</span>
+                                        {% else %}
+                                        <span class="badge bg-primary">Active</span>
+                                        {% endif %}
+                                    {% elif record.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                    {% elif record.status == 'returned' %}
+                                    <span class="badge bg-success">Returned</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if record.status == 'approved' and not record.returned %}
+                                    <form method="post" action="{% url 'return-book' record.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="action-button">
+                                            <span>Return Book</span>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Add smooth scroll behavior
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // Add hover effect to stat cards
+    document.querySelectorAll('.stat-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Add animation to table rows
+    document.querySelectorAll('.table tbody tr').forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.1}s`;
+        row.style.animation = 'fadeIn 0.5s ease-out forwards';
+    });
+</script>
+{% endblock %}

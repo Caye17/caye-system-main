@@ -1,0 +1,48 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}Confirm Delete{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="background: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px;">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2 class="card-title mb-4">Confirm Deletion</h2>
+                    <p class="lead">Are you sure you want to delete the following?</p>
+                    <p class="h4 mb-4"><strong>{{ object }}</strong></p>
+
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-lg rounded-pill me-2">
+                            <i class="bi bi-trash"></i> Yes, Delete
+                        </button>
+                    </form>
+                    
+                    {% if 'author' in request.path %}
+                        <a href="{% url 'authors' %}" class="btn btn-secondary btn-lg rounded-pill">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    {% elif 'book' in request.path %}
+                        <a href="{% url 'books' %}" class="btn btn-secondary btn-lg rounded-pill">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    {% elif 'borrowing-record' in request.path %}
+                        <a href="{% url 'borrowing-records' %}" class="btn btn-secondary btn-lg rounded-pill">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    {% elif 'loan' in request.path %}
+                        <a href="{% url 'loans' %}" class="btn btn-secondary btn-lg rounded-pill">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    {% else %}
+                        <a href="{% url 'home' %}" class="btn btn-secondary btn-lg rounded-pill">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

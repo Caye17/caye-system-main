@@ -1,0 +1,23 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container mt-5 login-container" style="background: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px;">
+    <h2 class="mb-4">Login</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary w-25 btn-sm d-block mx-auto">Login</button>
+    </form>
+    <div class="mt-3">
+        <a href="{% url 'register' %}">Don't have an account? Register</a> |
+        <a href="{% url 'public-home' %}">Back to Welcome</a>
+    </div>
+    {% if form.errors %}
+        <div class="alert alert-danger mt-3">
+            Please enter a correct username and password. Note that both fields may be case-sensitive.
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

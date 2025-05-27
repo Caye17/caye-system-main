@@ -1,0 +1,257 @@
+<!-- catalog/templates/catalog/base_generic.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}My Library{% endblock %}</title>
+
+    {% load static %}
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <!-- Bootstrap Icons (optional but nice!) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Your Custom CSS -->
+    <link rel="stylesheet" href="{% static 'catalog/styles.css' %}">
+
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Roboto', sans-serif;
+            background-color: pink;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #343a40;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar a {
+            color: #ffffff;
+            margin: 0 10px;
+            text-decoration: none;
+            transition: color 0.3s ease, border-bottom 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+            color: #ff9900;
+            border-bottom: 2px solid #ff9900;
+        }
+        .hero {
+            background-image: url('https://images.unsplash.com/photo-1524985069026-dd778a71c7b4');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .card-icon {
+            font-size: 40px;
+            color: #4e73df;
+        }
+        footer {
+            flex-shrink: 0;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .library-logo {
+            max-width: 80px;
+        }
+        /* Button Animations */
+        .btn {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease, background-color 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .btn-primary {
+            background-color: #007bff; /* Blue for primary actions */
+            color: #ffffff;
+        }
+        .btn-success {
+            background-color: #28a745; /* Green for success actions */
+            color: #ffffff;
+        }
+        .btn-danger {
+            background-color: #dc3545; /* Red for danger actions */
+            color: #ffffff;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: 2px solid #ff9900;
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+        .btn:active {
+            transform: translateY(0);
+            border: 2px solid #ff9900;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        /* Stats Card Animations */
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+            border: 2px solid #FFC0CB; /* Baby pink border */
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(255, 192, 203, 0.3); /* Pink shadow */
+            border: 2px solid #FFC0CB; /* Keep baby pink border on hover */
+        }
+        /* Advanced Animations */
+        .card, .btn, .navbar a {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .card:hover, .btn:hover, .navbar a:hover {
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff, 0 0 15px #ffffff; }
+            to { box-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #ffffff; }
+        }
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: #fff;
+            border-left: 4px solid #ff9900;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.show {
+            display: block;
+        }
+    </style>
+</head> 
+<body>
+
+    <header class="header">
+        <h1>Library Management System</h1>
+        <nav class="navbar">
+            {% if user.is_authenticated %}
+                {# Borrow History button removed for regular users #}
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'public-home' %}">Welcome</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="main-content container mt-4">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Library Management System</p>
+        <img src="{% static 'catalog/images/logo.png' %}" class="library-logo" alt="Library Logo">
+    </footer>
+
+    <!-- Bootstrap JS (with Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Add this right after the opening body tag -->
+    <div id="notification" class="notification">
+        <span id="notification-message"></span>
+    </div>
+
+    <!-- Add this before the closing body tag -->
+    <script>
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notification-message');
+            notificationMessage.textContent = message;
+            notification.classList.add('show');
+            
+            // Hide notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        // Intercept all link clicks
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A') {
+                const href = e.target.getAttribute('href');
+                if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                    e.preventDefault();
+                    fetch(href)
+                        .then(response => {
+                            if (response.status === 403) {
+                                response.text().then(text => {
+                                    if (text.includes('Only admins can')) {
+                                        showNotification(text);
+                                    } else {
+                                        window.location.href = href;
+                                    }
+                                });
+                            } else {
+                                window.location.href = href;
+                            }
+                        })
+                        .catch(() => {
+                            window.location.href = href;
+                        });
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

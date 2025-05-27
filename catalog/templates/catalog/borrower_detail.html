@@ -1,0 +1,66 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}{{ borrower.name }} Details — Home Library{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ borrower.name }}</h2>
+    <p><strong>Email:</strong> {{ borrower.email }}</p>
+
+    <h4 class="mt-4">Borrowing History</h4>
+    {% if combined_history %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Request Date</th>
+                        <th>Borrowing Date</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Returned Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in combined_history %}
+                    <tr>
+                        <td>{{ item.book.title }}</td>
+                        <td>{% if item.type == 'request' %}{{ item.request_date|date:"M d, Y" }}{% else %}—{% endif %}</td>
+                        <td>{% if item.type == 'record' %}{{ item.borrow_date|date:"M d, Y" }}{% else %}—{% endif %}</td>
+                        <td>{% if item.type == 'record' and item.due_date %}{{ item.due_date|date:"M d, Y" }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if item.type == 'request' %}
+                                <span class="badge bg-danger">Declined</span>
+                            {% elif item.type == 'record' %}
+                                {% if item.status == 'approved' %}
+                                    {% if item.returned %}
+                                        <span class="badge bg-success">Returned</span>
+                                    {% else %}
+                                         {% if item.due_date and item.due_date < today %}
+                                            <span class="badge bg-danger">Overdue</span>
+                                         {% else %}
+                                            <span class="badge bg-primary">Active</span>
+                                         {% endif %}
+                                    {% endif %}
+                                {% elif item.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% elif item.status == 'returned' %}
+                                     <span class="badge bg-success">Returned</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                         <td>{% if item.type == 'record' and item.return_date %}{{ item.return_date|date:"M d, Y" }}{% else %}—{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>{{ borrower.name }} has no borrowing history (including declined requests).</p>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'borrowing-records' %}" class="btn btn-secondary">Back to Manage Borrowings</a>
+    </div>
+</div>
+{% endblock %} 
