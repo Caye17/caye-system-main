@@ -1,0 +1,173 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}Books{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <a href="{% url 'home' %}" class="btn btn-secondary rounded-pill me-3">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+            <h1 class="mb-0">Book List</h1>
+        </div>
+        {% if user.is_staff %}
+            <a href="{% url 'book-create' %}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Add New Book
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="Search books..." value="{{ request.GET.search }}" aria-label="Search books">
+                </div>
+                <div class="col-md-3">
+                    <select name="author" class="form-select" aria-label="Filter by author">
+                        <option value="">All Authors</option>
+                        {% for author in authors %}
+                            <option value="{{ author.last_name }}" {% if request.GET.author == author.last_name %}selected{% endif %}>
+                                {{ author.last_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="genre" class="form-select" aria-label="Filter by genre">
+                        <option value="">All Genres</option>
+                        {% for genre in genres %}
+                            <option value="{{ genre }}" {% if request.GET.genre == genre %}selected{% endif %}>
+                                {{ genre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Books Table -->
+    <div class="table-responsive">
+        <table class="table table-hover equal-width-table">
+            <colgroup>
+                <col style="width: 14.28%;">
+                <col style="width: 14.28%;">
+                <col style="width: 14.28%;">
+                <col style="width: 14.28%;">
+                <col style="width: 14.28%;">
+                <col style="width: 14.28%;">
+                <col style="width: 14.28%;">
+            </colgroup>
+            <thead class="table-light">
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Publisher</th>
+                    <th>Genre</th>
+                    <th>Quantity</th>
+                    <th>Available</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'book-detail' book.pk %}" class="text-decoration-none">{{ book.title }}</a>
+                        </td>
+                        <td>{{ book.author }}</td>
+                        <td>{{ book.publisher|default:"Not specified" }}</td>
+                        <td>{{ book.genre }}</td>
+                        <td>
+                            {% if user.is_staff %}
+                                <form method="post" action="{% url 'book-update-quantity' book.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <div class="input-group input-group-sm" style="width: 100px;">
+                                        <input type="number" name="quantity" value="{{ book.quantity }}" min="0" class="form-control" aria-label="Update quantity">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm" aria-label="Save quantity">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            {% else %}
+                                {{ book.quantity }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% with available=book.get_available_quantity %}
+                                {% if available == 0 %}
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                {% elif available <= 2 %}
+                                    <span class="badge bg-warning">Low Stock ({{ available }})</span>
+                                {% else %}
+                                    <span class="badge bg-success">Available ({{ available }})</span>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td class="text-end">
+                            {% if user.is_staff %}
+                                <a href="{% url 'book-update' book.pk %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <a href="{% url 'book-delete' book.pk %}" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                            {% else %}
+                                {% if book.quantity > 0 %}
+                                    <form method="post" action="{% url 'book-borrow' book.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill">Borrow</button>
+                                    </form>
+                                {% else %}
+                                    <button class="btn btn-secondary btn-sm rounded-pill" disabled>Out of Stock</button>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="{% if user.is_staff %}6{% else %}5{% endif %}" class="text-center">No books found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.genre %}&genre={{ request.GET.genre }}{% endif %}">&laquo; First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.genre %}&genre={{ request.GET.genre }}{% endif %}">Previous</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.genre %}&genre={{ request.GET.genre }}{% endif %}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.author %}&author={{ request.GET.author }}{% endif %}{% if request.GET.genre %}&genre={{ request.GET.genre }}{% endif %}">Last &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

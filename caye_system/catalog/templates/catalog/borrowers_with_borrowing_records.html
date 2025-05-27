@@ -1,0 +1,53 @@
+{% extends "catalog/base_generic.html" %}
+{% block title %}Borrowers with Active Borrowings — Home Library{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Borrowers with Active Borrowings</h2>
+    <a href="{% url 'home' %}" class="btn btn-secondary mb-3 rounded-pill">← Back</a>
+    
+    <div class="row mt-4">
+        {% for borrower in borrowers %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ borrower.name }}</h5>
+                    {% if borrower.borrowingrecord_set.all %}
+                    <div class="mt-3">
+                        <h6 class="card-subtitle mb-2 text-muted">Current Borrowings:</h6>
+                        <ul class="list-unstyled">
+                            {% for record in borrower.borrowingrecord_set.all %}
+                            <li class="mb-2">
+                                <strong>{{ record.book.title }}</strong>
+                                <br>
+                                <small class="text-muted">Borrowing Date: {{ record.borrow_date|date:"M d, Y" }}{% if record.due_date %}, Due Date: {{ record.due_date|date:"M d, Y" }}{% endif %}</small>
+                                <br>
+                                {% if record.status == 'pending' %}
+                                <span class="badge badge-warning">Pending</span>
+                                {% elif record.status == 'approved' %}
+                                {% if record.return_date %}
+                                <span class="badge badge-success">Returned</span>
+                                {% else %}
+                                <span class="badge badge-primary">Active</span>
+                                {% endif %}
+                                {% elif record.status == 'rejected' %}
+                                <span class="badge badge-danger">Rejected</span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No active borrowings</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center">No borrowers with active borrowings found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

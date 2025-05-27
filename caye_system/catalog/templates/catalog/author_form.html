@@ -1,0 +1,33 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}
+  {% if view.object %}Edit Author{% else %}Add Author{% endif %}
+{% endblock %}
+
+{% block content %}
+  <div style="background: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; max-width: 600px; margin: 50px auto;">
+    <h2>{% if view.object %}Edit Author{% else %}Add Author{% endif %}</h2>
+    <a href="{% url 'home' %}" class="btn btn-secondary mb-3 rounded-pill author-back-btn">← Back</a>
+
+    <form method="post">
+      {% csrf_token %}
+
+      {% for field in form %}
+        <div class="form-group{% if field.errors %} has-error{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+            <small class="form-text text-muted">{{ field.help_text }}</small>
+          {% endif %}
+          {% for error in field.errors %}
+            <div class="error-message text-danger">{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="btn btn-primary">
+        {% if view.object %}Update{% else %}Add{% endif %} Author
+      </button>
+    </form>
+  </div>
+{% endblock %}

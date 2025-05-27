@@ -1,0 +1,112 @@
+{% extends "catalog/base_generic.html" %}
+{% block title %}{{ book.title }} — Home Library{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="book-detail-header mb-4" style="background: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px;">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="mb-0">{{ book.title }}</h2>
+      {% if user.is_authenticated %}
+        <div class="actions">
+          <a href="{% url 'book-update' book.pk %}" class="btn btn-primary rounded-pill me-2">Edit</a>
+          <a href="{% url 'book-delete' book.pk %}" class="btn btn-danger rounded-pill">Delete</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="book-detail-content" style="background: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px;">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="book-cover-container mb-4">
+          {% if book.cover_image %}
+            <img src="{{ book.cover_image.url }}" alt="Cover of {{ book.title }}" class="img-fluid rounded">
+          {% else %}
+            <div class="placeholder p-5 text-center bg-light rounded">No Cover Available</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="col-md-8">
+        <div class="book-info">
+          <div class="info-row mb-3">
+            <span class="label fw-bold">Author:</span>
+            <span class="value">
+              {% if book.author %}
+                <a href="{% url 'author-detail' book.author.pk %}">{{ book.author.first_name }} {{ book.author.last_name }}</a>
+              {% else %}
+                Unknown
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="info-row mb-3">
+            <span class="label fw-bold">ISBN:</span>
+            <span class="value">{{ book.isbn|default:"Not specified" }}</span>
+          </div>
+
+          <div class="info-row mb-3">
+            <span class="label fw-bold">Publication Date:</span>
+            <span class="value">{{ book.publication_date|date:"F j, Y"|default:"Unknown" }}</span>
+          </div>
+
+          <div class="info-row mb-3">
+            <span class="label fw-bold">Genre:</span>
+            <span class="value">{{ book.genre|default:"Not specified" }}</span>
+          </div>
+
+          <div class="info-row mb-3">
+            <span class="label fw-bold">Availability:</span>
+            <span class="value {% if book.is_available %}text-success{% else %}text-danger{% endif %}">
+              {% if book.is_available %}Available{% else %}Not Available{% endif %}
+            </span>
+          </div>
+
+          <div class="info-row mb-3">
+            <span class="label fw-bold">Language:</span>
+            <span class="value">{{ book.language|default:"Not specified" }}</span>
+          </div>
+
+          <div class="info-row mb-4">
+            <span class="label fw-bold">Summary:</span>
+            <p class="summary mt-2">{{ book.summary|default:"No summary available." }}</p>
+          </div>
+
+          <div class="borrowing-status p-4 bg-light rounded">
+            <h3 class="h5 mb-3">Borrowing Status</h3>
+            {% if book.borrowingrecord_set.all %}
+                {% for record in book.borrowingrecord_set.all %}
+                    <div class="mb-2">
+                        {% if record.returned %}
+                        <span class="text-muted">Returned by {{ record.borrower.name }} on {{ record.return_date|date:"M d, Y" }}</span>
+                        {% else %}
+                        <span>Currently borrowed by {{ record.borrower.name }}</span>
+                        <span class="text-muted">(Due: {{ record.due_date|date:"M d, Y" }})</span>
+                        {% if record.is_overdue %}
+                        <span class="badge badge-danger">Overdue</span>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No borrowing history</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <a href="{% url 'books' %}" class="btn btn-secondary rounded-pill">← Back to All Books</a>
+  </div>
+
+  {% if messages %}
+    <div class="mt-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

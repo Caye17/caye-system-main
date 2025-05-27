@@ -1,0 +1,12 @@
+{% extends "catalog/base_generic.html" %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center" style="background: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px;">
+    <h1 class="mb-4">Welcome to the Library Management System</h1>
+    <p class="lead">Please log in or register to access the library features.</p>
+    <a href="{% url 'login' %}" class="btn btn-primary btn-lg mx-2">Login</a>
+    <a href="{% url 'register' %}" class="btn btn-success btn-lg mx-2">Register</a>
+</div>
+{% endblock %} 
